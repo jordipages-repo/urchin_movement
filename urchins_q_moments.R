@@ -19,7 +19,7 @@ source("qmomentsFunctions.R")
 # # # 
 
 load("RData/urch.null.RData")
-# We start with the group of urchins we called "null" = Homogeneous light and no predator cues
+# We start with the group of urchins we called "null" = no predator cues
 # These urchins are the "control" group, and we'll use them to compare against the rest of treatments
 
 # We want a single data.frame with all the data with the x, y coordinates
@@ -65,7 +65,7 @@ lines(x = qs, y = as.numeric(mean.exp), type = "l", xlab = "q",
 # # # 
 
 load("RData/urch.pred.RData")
-# We now study the predator cues treatmetn = Homogeneous light and predator cues
+# We now study the predator cues treatment = predator cues
 # These urchins are the "control" group, and we'll use them to compare against the rest of treatments
 
 # We want a single data.frame with all the data with the x, y coordinates
@@ -104,93 +104,39 @@ lines(x = qs, y = as.numeric(mean.exp), type = "l", xlab = "q",
       col = "red", lwd = 4)
 
 
-
-
-# # # 
-# Shadows treatment ----
-# # # 
-
-load("RData/urch.shadows.RData")
-# We now study the predator cues treatmetn = Homogeneous light and predator cues
-# These urchins are the "control" group, and we'll use them to compare against the rest of treatments
-
-# We want a single data.frame with all the data with the x, y coordinates
-urch.shadows.MAT <- NULL
-for(i in 1:length(urch.shadows)){
-  x <- urch.shadows[[i]]$x
-  y <- urch.shadows[[i]]$y
-  ID <- rep(id(urch.shadows)[i], length(x))
-  time <- urch.shadows[[i]]$date
-  matriu <- data.frame(x, y, ID, time)
-  urch.shadows.MAT <- rbind(urch.shadows.MAT, matriu)
-}
-
-# We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
-# because the automatic image detection method [in Matlab] produced many errors, etc.)
-urch.shadows.MAT <- subset(urch.shadows.MAT, ID != "20120621_1" & ID != "20120621_2" & ID != "20120621_3" & ID != "20120621_4" & ID != "20120621_5" & ID != "20120621_6" & ID != "20120622_4" & ID != "20120622_5" & ID != "20120626_5" & ID != "20120626_6" & ID != "20120627_9" & ID != "20120629_12")
-
-# We'll now calculate the q's exponents for a whole stack of urchins with qmom() function
-listExp.urch.shadows <- qmom(urch.shadows.MAT)
-
-
-# We now plot all urchins from the shadows treatment, individually
-# This first line, is to identify the 3 bearing at which the shadow was moved for each individual
-listExp.urch.shadows$indiv <- c(rep(1,9),rep(1,9),rep(1,9),rep(2,9),rep(3,9),rep(3,9),rep(3,9),rep(4,9),rep(5,9),rep(5,9),rep(6,9),rep(9,9),rep(6,9),rep(6,9),rep(7,9),rep(7,9),rep(7,9),rep(8,9),rep(8,9),rep(10,9),rep(10,9),rep(10,9),rep(11,9),rep(11,9),rep(11,9),rep(12,9),rep(12,9),rep(12,9),rep(13,9),rep(16,9),rep(16,9),rep(13,9),rep(13,9),rep(14,9),rep(14,9),rep(14,9),rep(15,9),rep(15,9),rep(15,9))
-qs <- seq(from = 0, to = 8, by=1)
-plot(y=qs/2, x = qs, type = "l", xlab = "q", ylab = "Psi(q)", lwd = 1.5, lty = 2, ylim = c(0,8), xlim = c(0,8)) # Brownian motion Psi(q) = q/2. Dashed line
-lines(y = qs, x = qs, lwd = 1.5, lty = 3) # Ballistic motion Psi(q) = q. Dotted line
-nom.indiv <-unique(listExp.urch.shadows$indiv)
-for(i in 1:length(nom.indiv)){
-  individu <- subset(listExp.urch.shadows, indiv == nom.indiv[i])
-  exponents <- as.numeric(tapply(individu$exponents, individu$num, mean))
-  lines(x = qs, y = exponents)
-}
-mean.exp <- tapply(listExp.urch.shadows$exponents, listExp.urch.shadows$num, mean)
-sd.exp <- tapply(listExp.urch.shadows$exponents, listExp.urch.shadows$num, sd)
-conf.int <- tapply(listExp.urch.shadows$conf.int, listExp.urch.shadows$num, mean)
-lines(x = qs, y = as.numeric(mean.exp), type = "l", xlab = "q", 
-      ylab = expression(paste(zeta,"(q)")), xlim = c(0,8), ylim = c(0,8), 
-      col = "red", lwd = 4)  
-
-
-
-
 # # # 
 # Comparing the exponents for each experimental condition ----
 # # # 
 
 indiv.exp.null <- indiv_exp(listExp.urch.null)
 indiv.exp.pred <- indiv_exp(listExp.urch.pred)
-indiv.exp.shadows <- indiv_exp_shadows(listExp.urch.shadows)
 
-fin <- rbind(indiv.exp.null, indiv.exp.pred, indiv.exp.shadows)
-fin.id <- c(rep("null", 29), rep("predat", 21), rep("shadows", 16))
+fin <- rbind(indiv.exp.null, indiv.exp.pred)
+fin.id <- c(rep("null", 29), rep("predat", 21))
 fin <- cbind(fin, fin.id)
 
 boxplot(fin$coef~fin$fin.id)
 testem <- aov(lm(fin$coef~fin$fin.id))
 summary(testem)
-#             Df Sum Sq Mean Sq F value Pr(>F)  
-# fin$fin.id   2 0.3736  0.1868   4.777 0.0117 *
-# Residuals   63 2.4635  0.0391                 
+#             Df Sum Sq Mean Sq F value  Pr(>F)   
+# fin$fin.id   1 0.3071 0.30709   7.229 0.00983 **
+# Residuals   48 2.0390 0.04248                   
 # ---
-#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 TukeyHSD(testem)
-#                       diff         lwr          upr     p adj
-# predat-null     0.158786165  0.02278303  0.294789304 0.0182241
-# shadows-null   -0.007365565 -0.15518102  0.140449889 0.9921450
-# shadows-predat -0.166151730 -0.32366016 -0.008643302 0.0363996
+#               diff        lwr       upr     p adj
+# predat-null 0.1587862 0.04004473 0.2775276 0.0098327
 
 # Barplot of the exponents for each treatment
 mitj <- tapply(fin$coef, fin$fin.id, mean)
-#     null    predat   shadows 
-# 0.6743501 0.8331362 0.6669845
+#     null    predat    
+# 0.6743501 0.8331362 
 std <- tapply(fin$coef, fin$fin.id, std.error)
-# null     predat    shadows 
-# 0.04525674 0.02991768 0.04205228 
-bp <- barplot(mitj, ylim = c(0,1), ylab = "Psi(q) slope", names.arg = c("null", "predators", "shadows"))
+#     null     predat     
+# 0.04525674 0.02991768  
+bp <- barplot(mitj, ylim = c(0,1), ylab = "Psi(q) slope", names.arg = c("null", "predators"))
 arrows(bp, mitj, bp, mitj + std,  lwd = 1.5, angle = 90, length = 0.1)
 arrows(bp, mitj, bp, mitj - std,  lwd = 1.5, angle = 90, length = 0.1)
-text(x = bp, y = mitj + 0.15, labels = c("a", "b", "a"))
+text(x = bp, y = mitj + 0.15, labels = c("a", "b"))
 
 

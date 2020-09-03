@@ -1,6 +1,6 @@
 # # # # # # # # # # # # # # # # #  #
-#     Testing light homo- or       #
-#  heterogeneity in the different  #
+#     Testing light conditions     #
+#         in the different         #
 #     experimental treatments      #
 #                                  #
 #          Jordi F. Pagès          #
@@ -12,16 +12,16 @@ library(tidyverse)
 
 # Loading the data set
 light <- read.table(file = "RData/Light_conditions.txt", header = T)
+light <- light %>% 
+  filter(Experiment == 1) %>% 
+  mutate(Site = droplevels(light$Site))
 
 # Checking the effect of location (in the aquarium) on light conditions
-
-# HOMOGENEOUS LIGHT EXPERIMENT -----
-m.lloc <- lm(PAR~Site, data = light[which(light[,1] == 1), ])
-summary(m.lloc)
+m.lloc <- lm(PAR~Site, data = light)
 anova(m.lloc)
 
 # Post-hoc analysis
-m.lloc2 <- aov(PAR~Site, data = light[which(light[,1] == 1), ])
+m.lloc2 <- aov(PAR~Site, data = light)
 tukey <- TukeyHSD(m.lloc2) 
 plot(tukey)
 
@@ -29,45 +29,33 @@ plot(tukey)
 std.error <- function(x, na.rm = FALSE) {
   sd(x, na.rm = T)/sqrt(length(x))
 }
-mitj <- tapply(exp1$PAR, exp1$Site, mean)
-std <- tapply(exp1$PAR, exp1$Site, std.error)
+mitj <- tapply(light$PAR, light$Site, mean)
+std <- tapply(light$PAR, light$Site, std.error)
 bp <- barplot(mitj, ylim = c(0,11), ylab = "PAR (mmols photons s)")
 arrows(bp, mitj, bp, mitj + std,  lwd = 1.5, angle = 90, length = 0.1)
 arrows(bp, mitj, bp, mitj - std,  lwd = 1.5, angle = 90, length = 0.1)
 text(x = bp, y = mitj + 1, labels = c("a", "b", "a", "a", "c"))
 
+# Mean light irradiance
+mitj
+#   E      mid        N       S       W 
+# 7.4      9.3      7.5     7.7     5.1 
 
-# HETEROGENEOUS LIGHT EXPERIMENT (Shadows experiment) -----
-m.heterolight <- lm(PAR~Condition, data = light[which(light[,1] == 2), ])
-summary(m.heterolight)
-anova(m.heterolight)
+# Std error of light irradiance
+std
+#   E      mid        N       S       W 
+# 0.3      0.4      0.5     0.4     0.3 
 
-m.heterolight2 <- aov(PAR~Condition, data = light[which(light[,1] == 2), ])
-tukey <- TukeyHSD(m.heterolight2) 
-plot(tukey)
+# Difference in light between the area with max and each position
+#  E      mid        N       S       W  
+# 20.3    0.0     19.0    17.6    45.1
+# West area had 45% less irradiance compared to the middle of the pool.
 
-exp2 <- light[which(light[,1] == 2), ]
-exp2$photons <- (exp2$PAR*6.022)/10
-exp2$Condition <- as.character(exp2$Condition)
-exp2$Condition <- as.factor(exp2$Condition)
+# Difference in light between the mean irradiance in the arena, and each position
+#  E      mid        N       S       W  
+# -0.1   -25.6    -1.8    -3.5    31.1 
+# West area had 31% less irradiance than the mean irradiance of the arena.
 
-# Barplotting the data 
-std.error <- function(x, na.rm = FALSE) {
-  sd(x, na.rm = T)/sqrt(length(x))
-}
-mitj <- tapply(exp2$photons, exp2$Condition, mean)
-std <- tapply(exp2$photons, exp2$Condition, std.error)
-bp <- barplot(mitj, ylim = c(0,8), ylab = "PAR (x 1018 photons m-2 s-1)")
-arrows(bp, mitj, bp, mitj + std,  lwd = 1.5, angle = 90, length = 0.1)
-arrows(bp, mitj, bp, mitj - std,  lwd = 1.5, angle = 90, length = 0.1)
-text(x = bp, y = mitj + 1, labels = c("a", "a", "b"))
-
-
-# Means for each treatment
-light %>% 
-  filter(Site != "Nmid") %>%
-  group_by(Condition) %>% 
-  summarise(light = mean(PAR))
 
 
 

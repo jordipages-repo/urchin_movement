@@ -82,30 +82,25 @@ indiv_exp <- function(listExp){
 
 ###
 
-# Function to calculate the slope of the q moments line for each individual urchin, for the shadows experiment ----
-# (given there were 3 trials for each urchin, we calculate the mean slope for these 3 trials, 
-# to calculate an 'individual level' slope) 
-indiv_exp_shadows <- function(listExp){
-  listExp <- listExp.urch.shadows
-  noms <-unique(listExp$indiv)
-  tot <- matrix(ncol = 2, nrow = 0)
-  tot <- as.data.frame(tot)
-  names(tot) <- c("ID", "coef")
-  for(i in 1:length(noms)){
-    indiv <- subset(listExp, indiv == noms[i])
-    exponents <- as.numeric(tapply(indiv$exponents, indiv$num, mean))
-    regre <- lm(exponents~unique(indiv$num))
-    coeficients <- as.numeric(coef(regre)[2])
-    tot[i, 1] <- noms[i]
-    tot[i, 2] <- coeficients
-  }
-  tot
+# Standard error function ----
+std.error <- function(x, na.rm = FALSE) {
+  sd(x, na.rm = T)/sqrt(length(x))
 }
 
 
 ###
 
-# Standard error function ----
-std.error <- function(x, na.rm = FALSE) {
-  sd(x, na.rm = T)/sqrt(length(x))
-}
+# Function to make final model validations (qqplot and plot to inspect residual heterogeneity)
+mcheck <- function (obj, ... ) {  
+  rs <- resid(obj)
+  rs2 <- resid(obj, type = "pearson")
+  fv<-fitted(obj)
+  par(mfrow=c(2,2))
+  require(car)
+  plot(fv,rs,xlab="Fitted values",ylab="Residuals")
+  abline(h=0, lty=2)
+  lines(smooth.spline(fv, rs), col = "red")
+  qqPlot(rs,xlab="Normal scores",ylab="Ordered residuals")
+  plot(fv,rs2,xlab="Fitted values",ylab="Residuals Pearson")
+  par(mfrow=c(1,1))
+  invisible(NULL)}
