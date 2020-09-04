@@ -3,15 +3,21 @@ library(dplyr)
 library(ggsci)
 library(cowplot)
 
+# Running other scripts before plotting:
+source("urchins_tortuosity_classic.R")
+rm(list = setdiff(ls(), c("tort", "speed")))
+source("urchins_q_moments.R")
 rm(list = setdiff(ls(), c("tort", "speed", "fin")))
-std.error <- function(x, na.rm = FALSE) {
-  sd(x, na.rm = T)/sqrt(length(x))
-}
 
+# Running script with some of the functions needed
+source("qmomentsFunctions.R")
+
+# Adding labels to each data set
 fin$labels <- ifelse(fin$treatment== "Control", "a", "b")
 speed$labels <- ifelse(speed$exp== "Control", "a", "b")
 tort$labels <- ifelse(tort$exp== "Control", "a", "b")
   
+
 # # # 
 # Boxplots ----
 # # # 
@@ -64,6 +70,7 @@ box.exponents <- ggplot(fin, aes(x = treatment, y = coef)) +
 plot_grid(box.straightness, box.velocity, box.exponents, ncol = 1, align = 'v', labels = "AUTO")
 # ggsave2("Figs/Cowplot_boxplots.pdf")
 # ggsave2("Figs/Cowplot_boxplots.pdf", width = 130, height = 300, units = "mm")
+
 
 # # # 
 # Barplots----

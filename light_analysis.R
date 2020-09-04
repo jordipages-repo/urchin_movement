@@ -9,16 +9,18 @@
 
 
 library(tidyverse)
+source("qmomentsFunctions.R")
 
 # Loading the data set
 light <- read.table(file = "RData/Light_conditions.txt", header = T)
 light <- light %>% 
   filter(Experiment == 1) %>% 
-  mutate(Site = droplevels(light$Site))
+  mutate(Site = droplevels(Site))
 
 # Checking the effect of location (in the aquarium) on light conditions
 m.lloc <- lm(PAR~Site, data = light)
-anova(m.lloc)
+car::Anova(m.lloc)
+mcheck(m.lloc)
 
 # Post-hoc analysis
 m.lloc2 <- aov(PAR~Site, data = light)
