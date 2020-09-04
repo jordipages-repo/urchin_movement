@@ -8,6 +8,7 @@
 
 library(adehabitatLT)
 
+
 # # # 
 # Loading function to estimate q moments ----
 # # #
@@ -17,7 +18,7 @@ source("qmomentsFunctions.R")
 # # # 
 # Control urchins -----
 # # # 
-
+detach("package:dplyr")
 load("RData/urch.null.RData")
 # We start with the group of urchins we called "null" = no predator cues
 # These urchins are the "control" group, and we'll use them to compare against the rest of treatments
@@ -63,7 +64,7 @@ lines(x = qs, y = as.numeric(mean.exp), type = "l", xlab = "q",
 # # # 
 # Predator cues treatment ----
 # # # 
-
+detach("package:dplyr")
 load("RData/urch.pred.RData")
 # We now study the predator cues treatment = predator cues
 # These urchins are the "control" group, and we'll use them to compare against the rest of treatments
@@ -114,9 +115,10 @@ indiv.exp.pred <- indiv_exp(listExp.urch.pred)
 fin <- rbind(indiv.exp.null, indiv.exp.pred)
 fin.id <- c(rep("null", 29), rep("predat", 21))
 fin <- cbind(fin, fin.id)
+names(fin)[3] <- "treatment"
 
-boxplot(fin$coef~fin$fin.id)
-testem <- aov(lm(fin$coef~fin$fin.id))
+boxplot(fin$coef~fin$treatment)
+testem <- aov(lm(fin$coef~fin$treatment))
 summary(testem)
 #             Df Sum Sq Mean Sq F value  Pr(>F)   
 # fin$fin.id   1 0.3071 0.30709   7.229 0.00983 **
@@ -128,15 +130,62 @@ TukeyHSD(testem)
 # predat-null 0.1587862 0.04004473 0.2775276 0.0098327
 
 # Barplot of the exponents for each treatment
-mitj <- tapply(fin$coef, fin$fin.id, mean)
+mitj <- tapply(fin$coef, fin$treatment, mean)
 #     null    predat    
 # 0.6743501 0.8331362 
-std <- tapply(fin$coef, fin$fin.id, std.error)
+std <- tapply(fin$coef, fin$treatment, std.error)
 #     null     predat     
 # 0.04525674 0.02991768  
 bp <- barplot(mitj, ylim = c(0,1), ylab = "Psi(q) slope", names.arg = c("null", "predators"))
 arrows(bp, mitj, bp, mitj + std,  lwd = 1.5, angle = 90, length = 0.1)
 arrows(bp, mitj, bp, mitj - std,  lwd = 1.5, angle = 90, length = 0.1)
 text(x = bp, y = mitj + 0.15, labels = c("a", "b"))
+
+
+# Final plot in ggplot
+library(tidyverse)
+library(dplyr)
+fin <- as_tibble(fin)
+fin <- fin %>% 
+  mutate(treatment = recode(treatment, 
+                            null = "Control",
+                            predat = "Predators"),)
+
+# Boxplot
+ggplot(fin, aes(x = treatment, y = coef)) +
+  geom_boxplot(aes(fill = treatment)) +
+  geom_hline(yintercept = 0.5, lty = 2) +
+  geom_hline(yintercept = 1, lty = 3) +
+  xlab("") +
+  ylab(expression(paste(zeta,"(q)"))) +
+  coord_cartesian(ylim = c(0,1)) +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave("Figs/boxplot_exponents_vs_treatment.pdf")
+
+
+# Barplot
+fin %>% 
+  group_by(treatment) %>% 
+  summarise(mean = mean(coef),
+            std = std.error(coef)) %>% 
+ggplot(aes(x = treatment, y = mean)) +
+  geom_bar(aes(fill = treatment), stat = "identity") +
+  geom_errorbar(aes(ymin = mean-std, ymax = mean + std), width = 0.1) +
+  geom_hline(yintercept = 0.5, lty = 2) +
+  geom_hline(yintercept = 1, lty = 3) +
+  xlab("") +
+  ylab(expression(paste(zeta,"(q)"))) +
+  # coord_cartesian(ylim = c(0,1)) +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave("Figs/barplot_exponents_vs_treatment.pdf")
+
 
 

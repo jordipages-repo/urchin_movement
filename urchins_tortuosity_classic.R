@@ -22,7 +22,6 @@ source("qmomentsFunctions.R")
 # # # 
 # Straigthness index for control sea urchins ----
 # # #
-
 load("RData/urch.null.RData")
 
 # We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
@@ -56,7 +55,6 @@ tortuosity.null <- tot.D/sum.Lt1
 # # # 
 # Straigthness index for sea urchins with predator cues ----
 # # #
-
 load("RData/urch.pred.RData")
 
 # We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
@@ -130,6 +128,47 @@ arrows(bp, mitjana, bp, mitjana - error,  lwd = 1.5, angle = 90, length = 0.1)
 text(x = bp, y = mitjana + 0.15, labels = c("a", "b", "a"))
 
 
+# Boxplot in ggplot
+library(tidyverse)
+# Boxplot
+tort <- as_tibble(dades)
+tort <- tort %>% 
+  mutate(exp = recode(exp,
+                      null = "Control",
+                      predator = "Predators"))
+
+ggplot(tort, aes(x = exp, y = tortuosity)) +
+  geom_boxplot(aes(fill = exp)) +
+  coord_cartesian(ylim = c(0,1)) +
+  xlab("") +
+  ylab("Straightness index") +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave("Figs/boxplot_straightness_vs_treatment.pdf")
+
+
+# Barplot
+tort %>% 
+  group_by(exp) %>% 
+  summarise(mean = mean(tortuosity),
+            std = std.error(tortuosity)) %>% 
+  ggplot(aes(x = exp, y = mean)) +
+  geom_bar(aes(fill = exp), stat = "identity") +
+  geom_errorbar(aes(ymin = mean-std, ymax = mean + std), width = 0.1) +
+  coord_cartesian(ylim = c(0,1)) +
+  xlab("") +
+  ylab("Straightness index") +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave("Figs/barplot_straightness_vs_treatment.pdf")
+
+
 # # # 
 # CALCULATING VELOCITY ----
 # # # 
@@ -137,7 +176,7 @@ text(x = bp, y = mitjana + 0.15, labels = c("a", "b", "a"))
 # # # 
 # Velocity for sea urchins from the controls ----
 # # #
-
+detach("package:dplyr")
 load("RData/urch.null.RData")
 
 # We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
@@ -210,6 +249,46 @@ bp <- barplot(mitjana, ylim = c(0,13), ylab = "Mean speed (cm/minute)")
 arrows(bp, mitjana, bp, mitjana + error,  lwd = 1.5, angle = 90, length = 0.1)
 arrows(bp, mitjana, bp, mitjana - error,  lwd = 1.5, angle = 90, length = 0.1)
 text(x = bp, y = mitjana + 1.5, labels = c("a", "b", "a"))
+
+
+# Boxplot in ggplot
+library(tidyverse)
+library(dplyr)
+# Boxplot
+speed <- as_tibble(dades)
+speed <- speed %>% 
+  mutate(exp = recode(exp,
+                      null = "Control",
+                      predator = "Predators"))
+
+ggplot(speed, aes(x = exp, y = mean.speed.cm)) +
+  geom_boxplot(aes(fill = exp)) +
+  xlab("") +
+  ylab("Mean speed (cm/minute)") +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave("Figs/boxplot_speed_vs_treatment.pdf")
+
+
+# Barplot
+speed %>% 
+  group_by(exp) %>% 
+  summarise(mean = mean(mean.speed.cm),
+            std = std.error(mean.speed.cm)) %>% 
+  ggplot(aes(x = exp, y = mean)) +
+  geom_bar(aes(fill = exp), stat = "identity") +
+  geom_errorbar(aes(ymin = mean-std, ymax = mean + std), width = 0.1) +
+  xlab("") +
+  ylab("Mean speed (cm/minute)") +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave("Figs/barplot_speed_vs_treatment.pdf")
 
 
 # # # # 
