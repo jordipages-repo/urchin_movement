@@ -129,6 +129,25 @@ TukeyHSD(testem)
 #               diff        lwr       upr     p adj
 # predat-null 0.1587862 0.04004473 0.2775276 0.0098327
 
+# Model validation
+mcheck(testem) # We see quite some heterogeneity, but OK normality.
+
+# Let's deal with this heterogeneity
+library(nlme)
+m1 <- gls(coef ~ treatment, data = fin)
+m2 <- gls(coef ~ treatment, weights = varIdent(form = ~1|treatment), data = fin)
+anova(m1, m2) # Weights are needed
+
+mfinal <- gls(coef ~ treatment, weights = varIdent(form = ~1|treatment), data = fin)
+car::Anova(mfinal)
+# Analysis of Deviance Table (Type II tests)
+# Response: coef
+#           Df  Chisq Pr(>Chisq)   
+# treatment  1 8.5664   0.003424 **
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+mcheck2(mfinal) # Now, using Pearson's residuals, we see that there is no longer heterogeneity in the residuals.
+
 # Barplot of the exponents for each treatment
 mitj <- tapply(fin$coef, fin$treatment, mean)
 #     null    predat    

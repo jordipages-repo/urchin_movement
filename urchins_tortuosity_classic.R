@@ -105,18 +105,20 @@ anova(model1)
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 TukeyHSD(aov(lm(tortuosity~exp, data = dades)))
+mcheck(model1) # Good validation.
 
-model2 <- lm(asin.tort~exp, data = dades)
-anova(model2)
-# Analysis of Variance Table
-# Response: asin.tort
-#           Df Sum Sq Mean Sq F value   Pr(>F)   
-# exp        1 0.5530 0.55303  4.2385   0.04497 *
-# Residuals 48 6.2629 0.13048                       
-# ---
-# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
-TukeyHSD(aov(lm(asin.tort~exp, data = dades)))
-# plot(model2) # OK! Certa heterogeneitat, però OK!
+# model2 <- lm(asin.tort~exp, data = dades)
+# anova(model2)
+# # Analysis of Variance Table
+# # Response: asin.tort
+# #           Df Sum Sq Mean Sq F value   Pr(>F)   
+# # exp        1 0.5530 0.55303  4.2385   0.04497 *
+# # Residuals 48 6.2629 0.13048                       
+# # ---
+# # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+# TukeyHSD(aov(lm(asin.tort~exp, data = dades)))
+# mcheck(model2) # Validation is better for model1
+
 
 # Barplotting it
 mitjana <- tapply(dades$tortuosity, dades$exp, mean)
@@ -226,20 +228,21 @@ anova(model)
 # Residuals 48 11236.5  234.09                
 # ---
 #   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+mcheck(model) # Validation is OK!
 
-# Modelling velocity vs. experiment, deleting outliers
-dades <- dades[-44,]
-boxplot(mean.speed~exp, data = dades)
-model1 <- lm(mean.speed~exp, data = dades)
-anova(model1) 
-# Analysis of Variance Table
-# Response: mean.speed
-#           Df  Sum Sq Mean Sq F value    Pr(>F)    
-# exp        1 3310.6  3310.6  16.154 0.0002097 ***
-# Residuals 47 9632.3   204.9                      
-# ---
-#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
-# plot(model1) # Looks good
+# # Modelling velocity vs. experiment, deleting outliers
+# dades2 <- dades[-44,]
+# boxplot(mean.speed~exp, data = dades2)
+# model1 <- lm(mean.speed~exp, data = dades2)
+# anova(model1)
+# # Analysis of Variance Table
+# # Response: mean.speed
+# #           Df  Sum Sq Mean Sq F value    Pr(>F)
+# # exp        1 3310.6  3310.6  16.154 0.0002097 ***
+# # Residuals 47 9632.3   204.9
+# # ---
+# #   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# mcheck(model1)
 
 # Barplotting velocities
 dades$mean.speed.cm <- dades$mean.speed*0.1834 # els 0.1834 is the equivalence pixel-cm for our experiment
