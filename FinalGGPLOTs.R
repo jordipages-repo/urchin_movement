@@ -19,7 +19,7 @@ tort$labels <- ifelse(tort$exp== "Control", "a", "b")
   
 
 # # # 
-# Boxplots ----
+# Boxplots. Comparing all response variables ----
 # # # 
 
 box.straightness <- ggplot(tort, aes(x = exp, y = tortuosity)) +
@@ -73,7 +73,7 @@ plot_grid(box.straightness, box.velocity, box.exponents, ncol = 1, align = 'v', 
 
 
 # # # 
-# Barplots----
+# Barplots. Comparing all response variables ----
 # # # 
 bar.straightness <- tort %>% 
   group_by(exp) %>% 
@@ -140,3 +140,47 @@ bar.exponents <- fin %>%
 plot_grid(bar.straightness, bar.velocity, bar.exponents, ncol = 1, align = 'v', labels = "AUTO")
 # ggsave2("Figs/Cowplot_barplots.pdf")
 # ggsave2("Figs/Cowplot_barplots.pdf", width = 130, height = 300, units = "mm")
+
+
+
+
+# # # 
+# GGPLOTTING INDIVIDUAL EXPONENTS URCH.NULL ----
+# # # 
+
+library(tidyverse)
+as_tibble(listExp.urch.null) %>% 
+  mutate(qs = rep(qs, length(unique(listExp.urch.null$ID)))) %>% 
+  ggplot() + 
+  geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
+  geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
+  geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
+  xlab("q") +
+  ylab(expression(paste(zeta,"(q)"))) +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave2(filename = "Figs/indiv.exponents.controls.pdf")
+
+
+# # # 
+# GGPLOTTING INDIVIDUAL EXPONENTS URCH.PRED ----
+# # # 
+
+library(tidyverse)
+as_tibble(listExp.urch.pred) %>% 
+  mutate(qs = rep(qs, length(unique(listExp.urch.pred$ID)))) %>% 
+  ggplot() + 
+  geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
+  geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
+  geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
+  xlab("q") +
+  ylab(expression(paste(zeta,"(q)"))) +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave2(filename = "Figs/indiv.exponents.predators.pdf")
