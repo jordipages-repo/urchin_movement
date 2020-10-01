@@ -132,6 +132,7 @@ text(x = bp, y = mitjana + 0.15, labels = c("a", "b", "a"))
 
 # Boxplot in ggplot
 library(tidyverse)
+library(dplyr)
 # Boxplot
 tort <- as_tibble(dades)
 tort <- tort %>% 

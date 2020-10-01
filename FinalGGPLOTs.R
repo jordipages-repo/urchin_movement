@@ -153,8 +153,10 @@ as_tibble(listExp.urch.null) %>%
   mutate(qs = rep(qs, length(unique(listExp.urch.null$ID)))) %>% 
   ggplot() + 
   geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
-  geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
-  geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
+  # geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
+  # geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
+  geom_line(aes(x = qs, y = qs), lwd = 1, lty = 3) +
+  geom_line(aes(x = qs, y = qs/2), lwd = 1, lty = 2) +
   xlab("q") +
   ylab(expression(paste(zeta,"(q)"))) +
   theme_bw() +
@@ -174,8 +176,10 @@ as_tibble(listExp.urch.pred) %>%
   mutate(qs = rep(qs, length(unique(listExp.urch.pred$ID)))) %>% 
   ggplot() + 
   geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
-  geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
-  geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
+  # geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
+  # geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
+  geom_line(aes(x = qs, y = qs), lwd = 1, lty = 3) +
+  geom_line(aes(x = qs, y = qs/2), lwd = 1, lty = 2) +
   xlab("q") +
   ylab(expression(paste(zeta,"(q)"))) +
   theme_bw() +

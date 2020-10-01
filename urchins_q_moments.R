@@ -18,7 +18,6 @@ source("qmomentsFunctions.R")
 # # # 
 # Control urchins -----
 # # # 
-detach("package:dplyr")
 load("RData/urch.null.RData")
 # We start with the group of urchins we called "null" = no predator cues
 # These urchins are the "control" group, and we'll use them to compare against the rest of treatments
@@ -64,7 +63,6 @@ lines(x = qs, y = as.numeric(mean.exp), type = "l", xlab = "q",
 # # # 
 # Predator cues treatment ----
 # # # 
-detach("package:dplyr")
 load("RData/urch.pred.RData")
 # We now study the predator cues treatment = predator cues
 # These urchins are the "control" group, and we'll use them to compare against the rest of treatments
