@@ -141,6 +141,7 @@ rel.angle_pred_entropy <- entropy(rel.angle_binned_urch.pred$n)
 # # #
 
 library(tidyverse)
+library(dplyr)
 library(ggsci)
 
 # For control urchins
@@ -179,14 +180,14 @@ control_entropiesALL$treatment <- as.factor(control_entropiesALL$treatment)
 pred_entropiesALL$treatment <- "Predators"
 pred_entropiesALL$treatment <- as.factor(pred_entropiesALL$treatment)
 
-all <- rbind(control_entropiesALL, pred_entropiesALL)
+x.all <- rbind(control_entropiesALL, pred_entropiesALL)
 
-model <- lm(entropy.counts.n. ~ treatment, data = all)
+model <- lm(entropy.counts.n. ~ treatment, data = x.all)
 car::Anova(model)
 summary(model)
 mcheck(model) # OK!
 
-all %>% 
+p1 <- x.all %>% 
   mutate(labels = ifelse(treatment == "Control", "a", "b")) %>% 
   ggplot(aes(x = treatment, y = entropy.counts.n.)) +
   geom_violin(aes(fill = treatment)) + 
@@ -211,6 +212,7 @@ all %>%
 
 library(tidyverse)
 library(ggsci)
+library(dplyr)
 
 # For control urchins
 ids <- as.character(unique(urch.null.MAT$ID))
@@ -248,14 +250,14 @@ control_entropiesALL$treatment <- as.factor(control_entropiesALL$treatment)
 pred_entropiesALL$treatment <- "Predators"
 pred_entropiesALL$treatment <- as.factor(pred_entropiesALL$treatment)
 
-all <- rbind(control_entropiesALL, pred_entropiesALL)
+rel.angles.all <- rbind(control_entropiesALL, pred_entropiesALL)
 
-model <- lm(entropy.counts.n. ~ treatment, data = all)
+model <- lm(entropy.counts.n. ~ treatment, data = rel.angles.all)
 car::Anova(model)
 summary(model)
 mcheck(model) # OK!
 
-all %>% 
+p2 <- rel.angles.all %>% 
   mutate(labels = ifelse(treatment == "Control", "a", "b")) %>% 
   ggplot(aes(x = treatment, y = entropy.counts.n.)) +
   geom_violin(aes(fill = treatment)) + 
@@ -271,3 +273,55 @@ all %>%
         panel.grid.minor = element_blank(),
         text = element_text(size = 18))
 # ggsave("Figs/rel.angle.entropy.pdf")
+
+
+# Cowplot panels
+library(cowplot)
+
+plot_grid(p1, p2, ncol = 2, align = 'h', labels = "AUTO")
+# ggsave2("Figs/Cowplot_entropy.pdf", width = 300, height = 150, units = "mm")
+
+
+
+# # # 
+# Checking relationship between qmoments and rel.angles entropy ----
+# # #
+
+detach("package:dplyr")
+source("urchins_q_moments.R")
+
+library(tidyverse)
+library(ggsci)
+
+names(x.all) <- c("ID", "x.entropy", "treatment")
+x.all <- as_tibble(x.all)
+
+names(rel.angles.all) <- c("ID", "rel.angles.entropy", "treatment")
+rel.angles.all <- as_tibble(rel.angles.all)
+fin
+
+x.all %>% 
+  left_join(rel.angles.all, by = "ID") %>% 
+  left_join(fin, by = "ID") %>%
+  # filter(treatment == "Control")
+  # ggplot(aes(x = coef, y = x.entropy)) +
+  ggplot(aes(x = coef, y = rel.angles.entropy)) +
+  # geom_smooth(colour = "black", method = "lm", formula = y ~ exp(x)) +
+  geom_smooth(colour = "black", span = 0.9) +
+  # geom_smooth(aes(group = treatment, colour = treatment, fill = treatment), method = "lm", formula = y ~ exp(x)) +
+  # geom_smooth(aes(group = treatment, colour = treatment, fill = treatment), span = 0.9) +
+  geom_point(aes(colour = treatment)) + 
+  scale_colour_d3("category20") +
+  scale_fill_d3("category20") +
+  xlab(expression(paste(zeta,"(q)"))) +
+  ylab("Entropy") +
+  theme_bw() +
+  theme(legend.position = c(0.25,0.1),
+        legend.direction = "horizontal",
+        legend.title = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+# ggsave("Figs/EntropyVScoefqmoments_by_treatments_loess2.pdf")
+
+
