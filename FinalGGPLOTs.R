@@ -208,11 +208,14 @@ plot_grid(bar.straightness, bar.velocity, bar.exponents, ncol = 1, align = 'v', 
 # GGPLOTTING INDIVIDUAL EXPONENTS URCH.NULL ----
 # # # 
 library(tidyverse)
+library(dplyr)
 qs <- seq(from = 0, to = 8, by=1)
-as_tibble(listExp.urch.null) %>% 
+q1 <- as_tibble(listExp.urch.null) %>% 
   mutate(qs = rep(qs, length(unique(listExp.urch.null$ID)))) %>% 
   ggplot() + 
-  geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
+  # geom_line(aes(x = qs, y = exponents, group = ID, alpha = ID), colour = "#1F77B4FF", lwd = 0.6) +
+  geom_line(aes(x = qs, y = exponents, colour = ID)) +
+  # geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
   # geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
   # geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
   geom_line(aes(x = qs, y = qs), lwd = 1, lty = 3) +
@@ -224,6 +227,7 @@ as_tibble(listExp.urch.null) %>%
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         text = element_text(size = 18))
+q1
 # ggsave2(filename = "Figs/indiv.exponents.controls.pdf")
 
 
@@ -232,10 +236,12 @@ as_tibble(listExp.urch.null) %>%
 # # # 
 
 library(tidyverse)
-as_tibble(listExp.urch.pred) %>% 
+q2 <- as_tibble(listExp.urch.pred) %>% 
   mutate(qs = rep(qs, length(unique(listExp.urch.pred$ID)))) %>% 
   ggplot() + 
-  geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
+  # geom_line(aes(x = qs, y = exponents, group = ID, alpha = ID), colour = "#FF7F0EFF", lwd = 0.6) +
+  geom_line(aes(x = qs, y = exponents, colour = ID)) +
+  # geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
   # geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
   # geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
   geom_line(aes(x = qs, y = qs), lwd = 1, lty = 3) +
@@ -247,14 +253,18 @@ as_tibble(listExp.urch.pred) %>%
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         text = element_text(size = 18))
+q2
 # ggsave2(filename = "Figs/indiv.exponents.predators.pdf")
 
 
-# # # 
-# GGPLOTTING Qmoment HISTOGRAMS
+
+
 # # #
+# PANEL PLOT OF TRAJECTORIES AND CORRESPONDING QMOMENTS
+# # #
+detach("package:dplyr")
+source("Trajectory_visualisation.R")
+library(cowplot)
 
-ggplot(data = fin) +
-  geom_histogram(aes(coef, fill = treatment), binwidth = 1)
-  
-
+plot_grid(p1, q1, p2, q2, ncol = 2, nrow = 2, labels = "AUTO")
+# ggsave("Figs/trajectoriesANDqmomentsMULTICOLOR.pdf")

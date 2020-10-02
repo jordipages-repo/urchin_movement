@@ -122,6 +122,7 @@ p1 <- urch.null.MAT %>%
   # filter(ID %in% sample(unique(ID), 21)) %>% 
   ggplot() +
   geom_path(aes(x = x, y = y, colour = ID)) +
+  # geom_path(aes(x = x, y = y, alpha = ID), colour = "#1F77B4FF") +
   xlim(0, 1800) +
   ylim(0, 1300) +
   # ggtitle(label = "Control treatment", subtitle = "(subsample of n = 21)") +
@@ -134,6 +135,7 @@ p1 <- urch.null.MAT %>%
 
 p2 <- ggplot(data = urch.pred.MAT) +
   geom_path(aes(x = x, y = y, colour = ID)) +
+  # geom_path(aes(x = x, y = y, alpha = ID), colour = "#FF7F0EFF") +
   xlim(0, 1800) +
   ylim(0, 1300) +
   # ggtitle(label = "Predator treatment", subtitle = "(n = 21)") +

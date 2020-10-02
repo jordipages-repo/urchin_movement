@@ -213,6 +213,7 @@ p1 <- x.all %>%
 library(tidyverse)
 library(ggsci)
 library(dplyr)
+library(cowplot)
 
 # For control urchins
 ids <- as.character(unique(urch.null.MAT$ID))
@@ -291,6 +292,7 @@ detach("package:dplyr")
 source("urchins_q_moments.R")
 
 library(tidyverse)
+library(dplyr)
 library(ggsci)
 
 names(x.all) <- c("ID", "x.entropy", "treatment")
@@ -300,20 +302,20 @@ names(rel.angles.all) <- c("ID", "rel.angles.entropy", "treatment")
 rel.angles.all <- as_tibble(rel.angles.all)
 fin
 
-x.all %>% 
+entropyVSqmom <- x.all %>% 
   left_join(rel.angles.all, by = "ID") %>% 
   left_join(fin, by = "ID") %>%
   # filter(treatment == "Control")
   # ggplot(aes(x = coef, y = x.entropy)) +
   ggplot(aes(x = coef, y = rel.angles.entropy)) +
   # geom_smooth(colour = "black", method = "lm", formula = y ~ exp(x)) +
-  geom_smooth(colour = "black", span = 0.9) +
+  # geom_smooth(colour = "black", span = 0.9) +
   # geom_smooth(aes(group = treatment, colour = treatment, fill = treatment), method = "lm", formula = y ~ exp(x)) +
-  # geom_smooth(aes(group = treatment, colour = treatment, fill = treatment), span = 0.9) +
+  geom_smooth(aes(group = treatment, colour = treatment, fill = treatment), span = 1) +
   geom_point(aes(colour = treatment)) + 
   scale_colour_d3("category20") +
   scale_fill_d3("category20") +
-  xlab(expression(paste(zeta,"(q)"))) +
+  xlab(expression(paste(zeta,"(q) slope"))) +
   ylab("Entropy") +
   theme_bw() +
   theme(legend.position = c(0.25,0.1),
@@ -324,4 +326,6 @@ x.all %>%
         text = element_text(size = 18))
 # ggsave("Figs/EntropyVScoefqmoments_by_treatments_loess2.pdf")
 
-
+library(cowplot)
+plot_grid(p2, entropyVSqmom, ncol = 2, align = "h", labels = "AUTO")
+# ggsave2("Figs/Entropy_panel_plot.pdf", width = 310, height = 150, units = "mm")
