@@ -18,7 +18,7 @@ urch.null.MAT <- NULL
 for(i in 1:length(urch.null)){
   x <- urch.null[[i]]$x
   y <- urch.null[[i]]$y
-  ID <- rep(id(urch.null)[i], length(x))
+  ID <- rep(adehabitatLT::id(urch.null)[i], length(x))
   time <- urch.null[[i]]$date
   matriu <- data.frame(x, y, ID, time)
   urch.null.MAT <- rbind(urch.null.MAT, matriu)
@@ -26,7 +26,7 @@ for(i in 1:length(urch.null)){
 # We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
 # because the automatic image detection method [in Matlab] produced many errors, etc.)
 urch.null.MAT <- subset(urch.null.MAT, ID != "20120528_4" & ID != "20120528_5" & ID != "20120528_6" & ID != "20120607_5")
-urch.null.MAT$ID <- droplevels(urch.null.MAT$ID)
+# urch.null.MAT$ID <- droplevels(urch.null.MAT$ID)
 
 # We now study the predator cues treatment = predator cues
 # We want a single data.frame with all the data with the x, y coordinates
@@ -35,7 +35,7 @@ urch.pred.MAT <- NULL
 for(i in 1:length(urch.pred)){
   x <- urch.pred[[i]]$x
   y <- urch.pred[[i]]$y
-  ID <- rep(id(urch.pred)[i], length(x))
+  ID <- rep(adehabitatLT::id(urch.pred)[i], length(x))
   time <- urch.pred[[i]]$date
   matriu <- data.frame(x, y, ID, time)
   urch.pred.MAT <- rbind(urch.pred.MAT, matriu)
@@ -43,7 +43,7 @@ for(i in 1:length(urch.pred)){
 # We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
 # because the automatic image detection method [in Matlab] produced many errors, etc.)
 urch.pred.MAT <- subset(urch.pred.MAT, ID != "20120613_12" & ID != "20120614_8")
-urch.pred.MAT$ID <- droplevels(urch.pred.MAT$ID)
+# urch.pred.MAT$ID <- droplevels(urch.pred.MAT$ID)
 
 
 
@@ -114,14 +114,20 @@ ggplot(data = urch.pred.MAT) +
 # # # 
 # GGPLOT PREDATOR vs CONTROL SUBSAMPLING ----
 # # # 
+
+# To be run after running FinalGGPLOTs.R script
+
 library(tidyverse)
 library(cowplot)
 library(ggsci)
 
+
 p1 <- urch.null.MAT %>% 
   # filter(ID %in% sample(unique(ID), 21)) %>% 
+  dplyr::left_join(dplyr::select(fin, coef, ID), by = "ID") %>% 
   ggplot() +
-  geom_path(aes(x = x, y = y, colour = ID)) +
+  # geom_path(aes(x = x, y = y, colour = ID)) +
+  geom_path(aes(x = x, y = y, group = ID, alpha = coef), colour = "#1F77B4FF") +
   # geom_path(aes(x = x, y = y, alpha = ID), colour = "#1F77B4FF") +
   xlim(0, 1800) +
   ylim(0, 1300) +
@@ -133,8 +139,11 @@ p1 <- urch.null.MAT %>%
         panel.grid.minor = element_blank(),
         text = element_text(size = 18))
 
-p2 <- ggplot(data = urch.pred.MAT) +
-  geom_path(aes(x = x, y = y, colour = ID)) +
+p2 <- urch.pred.MAT %>% 
+  dplyr::left_join(dplyr::select(fin, coef, ID), by = "ID") %>% 
+  ggplot() +
+  # geom_path(aes(x = x, y = y, colour = ID)) +
+  geom_path(aes(x = x, y = y, group = ID, alpha = coef), colour = "#FF7F0EFF") +
   # geom_path(aes(x = x, y = y, alpha = ID), colour = "#FF7F0EFF") +
   xlim(0, 1800) +
   ylim(0, 1300) +

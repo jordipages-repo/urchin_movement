@@ -1,7 +1,7 @@
 # Running other scripts before plotting:
 source("urchins_tortuosity_classic.R")
 rm(list = setdiff(ls(), c("tort", "speed")))
-detach("package:dplyr")
+# detach("package:dplyr")
 source("urchins_q_moments.R")
 rm(list = setdiff(ls(), c("tort", "speed", "fin", "listExp.urch.null", "listExp.urch.pred")))
 
@@ -129,7 +129,7 @@ violin.exponents <- ggplot(fin, aes(x = treatment, y = coef)) +
 
 plot_grid(violin.straightness, violin.velocity, violin.exponents, ncol = 1, align = 'v', labels = "AUTO")
 # ggsave2("Figs/Cowplot_violinplots.pdf")
-ggsave2("Figs/Cowplot_violinplots.pdf", width = 130, height = 300, units = "mm")
+# ggsave2("Figs/Cowplot_violinplots.pdf", width = 130, height = 300, units = "mm")
 
 
 # # # 
@@ -207,14 +207,14 @@ plot_grid(bar.straightness, bar.velocity, bar.exponents, ncol = 1, align = 'v', 
 # # # 
 # GGPLOTTING INDIVIDUAL EXPONENTS URCH.NULL ----
 # # # 
-library(tidyverse)
-library(dplyr)
 qs <- seq(from = 0, to = 8, by=1)
 q1 <- as_tibble(listExp.urch.null) %>% 
-  mutate(qs = rep(qs, length(unique(listExp.urch.null$ID)))) %>% 
+  mutate(qs = rep(qs, length(unique(listExp.urch.null$ID)))) %>%
+  left_join(select(fin, coef, ID), by = "ID") %>% 
   ggplot() + 
+  geom_line(aes(x = qs, y = exponents, group = ID, alpha = coef), colour = "#1F77B4FF", lwd = 0.6) +
   # geom_line(aes(x = qs, y = exponents, group = ID, alpha = ID), colour = "#1F77B4FF", lwd = 0.6) +
-  geom_line(aes(x = qs, y = exponents, colour = ID)) +
+  # geom_line(aes(x = qs, y = exponents, colour = ID)) +
   # geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
   # geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
   # geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
@@ -235,12 +235,13 @@ q1
 # GGPLOTTING INDIVIDUAL EXPONENTS URCH.PRED ----
 # # # 
 
-library(tidyverse)
 q2 <- as_tibble(listExp.urch.pred) %>% 
   mutate(qs = rep(qs, length(unique(listExp.urch.pred$ID)))) %>% 
+  left_join(select(fin, coef, ID), by = "ID") %>% 
   ggplot() + 
-  # geom_line(aes(x = qs, y = exponents, group = ID, alpha = ID), colour = "#FF7F0EFF", lwd = 0.6) +
-  geom_line(aes(x = qs, y = exponents, colour = ID)) +
+  geom_line(aes(x = qs, y = exponents, group = ID, alpha = coef), colour = "#FF7F0EFF", lwd = 0.6) +
+  # geom_line(aes(x = qs, y = exponents, group = ID, alpha = ID), colour = "#1F77B4FF", lwd = 0.6) +
+  # geom_line(aes(x = qs, y = exponents, colour = ID)) +
   # geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
   # geom_line(aes(x = qs, y = qs), colour = "#1F77B4FF", lwd = 2, alpha = 0.7) +
   # geom_line(aes(x = qs, y = qs/2),  colour = "#FF7F0EFF", lwd = 2, alpha = 0.7) +
@@ -262,9 +263,7 @@ q2
 # # #
 # PANEL PLOT OF TRAJECTORIES AND CORRESPONDING QMOMENTS
 # # #
-detach("package:dplyr")
 source("Trajectory_visualisation.R")
-library(cowplot)
 
 plot_grid(p1, q1, p2, q2, ncol = 2, nrow = 2, labels = "AUTO")
-# ggsave("Figs/trajectoriesANDqmomentsMULTICOLOR.pdf")
+# ggsave("Figs/trajectoriesANDqmomentsALPHAforQExponents.pdf")

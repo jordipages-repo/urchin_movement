@@ -27,7 +27,7 @@ urch.null.MAT <- NULL
 for(i in 1:length(urch.null)){
   x <- urch.null[[i]]$x
   y <- urch.null[[i]]$y
-  ID <- rep(id(urch.null)[i], length(x))
+  ID <- rep(adehabitatLT::id(urch.null)[i], length(x))
   time <- urch.null[[i]]$date
   matriu <- data.frame(x, y, ID, time)
   urch.null.MAT <- rbind(urch.null.MAT, matriu)
@@ -72,7 +72,7 @@ urch.pred.MAT <- NULL
 for(i in 1:length(urch.pred)){
   x <- urch.pred[[i]]$x
   y <- urch.pred[[i]]$y
-  ID <- rep(id(urch.pred)[i], length(x))
+  ID <- rep(adehabitatLT::id(urch.pred)[i], length(x))
   time <- urch.pred[[i]]$date
   matriu <- data.frame(x, y, ID, time)
   urch.pred.MAT <- rbind(urch.pred.MAT, matriu)
