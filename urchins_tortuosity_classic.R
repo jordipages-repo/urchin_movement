@@ -41,7 +41,7 @@ for(i in 1:length(urch.null)){
 graella.t1 <- NULL
 for(i in 1:length(urch.null)){
   dist <- urch.null[[i]]$dist
-  nom <- i
+  nom <- adehabitatLT::id(urch.null)[i]
   tot <- data.frame(dist, rep(nom, length(urch.null[[i]]$x)))
   graella.t1 <- rbind(graella.t1, tot)
 }
@@ -74,7 +74,7 @@ for(i in 1:length(urch.pred)){
 graella.t1 <- NULL
 for(i in 1:length(urch.pred)){
   dist <- urch.pred[[i]]$dist
-  nom <- i
+  nom <- adehabitatLT::id(urch.pred)[i]
   tot <- data.frame(dist, rep(nom, length(urch.pred[[i]]$x)))
   graella.t1 <- rbind(graella.t1, tot)
 }
@@ -118,6 +118,35 @@ mcheck(model1) # Good validation.
 # # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
 # TukeyHSD(aov(lm(asin.tort~exp, data = dades)))
 # mcheck(model2) # Validation is better for model1
+
+
+
+# # # 
+# Testing straightness for each experiment, with the day of trial as a random effect ----
+# # #
+
+library(tidyverse)
+fin2 <- dades %>% 
+  mutate(ID = rownames(dades),
+         trial_day = str_sub(ID, 1,8))
+
+library(nlme)
+library(car)
+m1 <- gls(tortuosity ~ exp, data = fin2)
+m2 <- lme(tortuosity ~ exp, data = fin2, random = ~1|trial_day)
+m3 <- lme(tortuosity ~ exp, data = fin2, random = ~1|trial_day, weights = varIdent(form = ~1|exp))
+anova(m1, m2) # RANDOM EFFECT NOT NEEDED!
+anova(m1, m3) # Weights NOT needed.
+anova(m2, m3) # Weights NOT needed.
+Anova(m1) 
+Anova(m2)
+Anova(m3)
+# All 3 models give more or less the same results
+mcheck(m1)
+mcheck(m2) 
+mcheck2(m3)
+# All validations OK.
+
 
 
 # Barplotting it
@@ -187,10 +216,12 @@ load("RData/urch.null.RData")
 urch.null <- urch.null[-which(id(urch.null) == "20120528_4" | id(urch.null) == "20120528_5" | id(urch.null) == "20120528_6" | id(urch.null) == "20120607_5")]
 
 # Calculating velocity
-mean.speed.null <- NULL
+mean.speed.null <- data.frame(matrix(ncol = 2, nrow = 1))
 for(i in 1:length(urch.null)){
-  mean.speed.null[i] <- mean(urch.null[[i]]$dist/0.5, na.rm = T) # velocity is in píxels . minut-1
+  mean.speed.null[i,1] <- adehabitatLT::id(urch.null)[i]
+  mean.speed.null[i,2] <- mean(urch.null[[i]]$dist/0.5, na.rm = T) # velocity is in píxels . minut-1
 }
+names(mean.speed.null) <- c("ID", "mean.speed")
 
 
 # # # 
@@ -204,10 +235,12 @@ load("RData/urch.pred.RData")
 urch.pred <- urch.pred[-which(id(urch.pred) == "20120613_12" | id(urch.pred) == "20120614_8")]
 
 # Calculating velocity
-mean.speed.pred <- NULL
+mean.speed.pred <- data.frame(matrix(ncol = 2, nrow = 1))
 for(i in 1:length(urch.pred)){
-  mean.speed.pred[i] <- mean(urch.pred[[i]]$dist/0.5, na.rm = T) # en píxels per minut
+  mean.speed.pred[i,1] <- adehabitatLT::id(urch.pred)[i]
+  mean.speed.pred[i,2] <- mean(urch.pred[[i]]$dist/0.5, na.rm = T) # en píxels per minut
 }
+names(mean.speed.pred) <- c("ID", "mean.speed")
 
 
 # # # 
@@ -215,12 +248,11 @@ for(i in 1:length(urch.pred)){
 # # #
 
 experiment <- c(rep("null", 29), rep("predator", 21))
-dades <- data.frame(experiment, c(mean.speed.null, mean.speed.pred))
-names(dades) <- c("exp", "mean.speed")
-boxplot(mean.speed~exp, data = dades) # We can see 2 outliers
+dades <- cbind(experiment, rbind(mean.speed.null, mean.speed.pred))
+boxplot(mean.speed~experiment, data = dades) # We can see 2 outliers
 
 # Modelling velocity vs. experiment, without deleting outliers
-model <- lm(mean.speed~exp, data = dades)
+model <- lm(mean.speed~experiment, data = dades)
 anova(model) 
 # Analysis of Variance Table
 # Response: mean.speed
@@ -244,6 +276,34 @@ mcheck(model) # Validation is OK!
 # # ---
 # #   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 # mcheck(model1)
+
+
+# # # 
+# Testing velocity for each experiment, with the day of trial as a random effect ----
+# # #
+
+library(tidyverse)
+library(dplyr)
+fin2 <- dades %>% 
+  mutate(trial_day = str_sub(ID, 1,8))
+
+library(nlme)
+library(car)
+m1 <- gls(mean.speed ~ experiment, data = fin2)
+m2 <- lme(mean.speed ~ experiment, data = fin2, random = ~1|trial_day)
+m3 <- lme(mean.speed ~ experiment, data = fin2, random = ~1|trial_day, weights = varIdent(form = ~1|experiment))
+anova(m1, m2) # RANDOM EFFECT NOT NEEDED!
+anova(m1, m3) # Weights NOT needed.
+anova(m2, m3) # Weights NOT needed.
+Anova(m1) 
+Anova(m2)
+Anova(m3)
+# All 3 models give more or less the same results
+mcheck(m1)
+mcheck(m2)
+mcheck2(m3)
+# All validations OK.
+
 
 # Barplotting velocities
 dades$mean.speed.cm <- dades$mean.speed*0.1834 # els 0.1834 is the equivalence pixel-cm for our experiment

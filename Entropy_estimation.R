@@ -37,7 +37,6 @@ for(i in 1:length(urch.null)){
 # We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
 # because the automatic image detection method [in Matlab] produced many errors, etc.)
 urch.null.MAT <- subset(urch.null.MAT, ID != "20120528_4" & ID != "20120528_5" & ID != "20120528_6" & ID != "20120607_5")
-urch.null.MAT$ID <- droplevels(urch.null.MAT$ID)
 
 
 # # # 
@@ -63,7 +62,6 @@ for(i in 1:length(urch.pred)){
 # We delete some urchins that for different reasons had problems (e.g. because they were not healthy, 
 # because the automatic image detection method [in Matlab] produced many errors, etc.)
 urch.pred.MAT <- subset(urch.pred.MAT, ID != "20120613_12" & ID != "20120614_8")
-urch.pred.MAT$ID <- droplevels(urch.pred.MAT$ID)
 
 
 
@@ -253,11 +251,34 @@ pred_entropiesALL$treatment <- as.factor(pred_entropiesALL$treatment)
 
 rel.angles.all <- rbind(control_entropiesALL, pred_entropiesALL)
 
+# Testing effect of treatment on entropy. 
 model <- lm(entropy.counts.n. ~ treatment, data = rel.angles.all)
 car::Anova(model)
 summary(model)
 mcheck(model) # OK!
 
+# Checking potential random effect of day of trial
+rel.angles.all2 <- rel.angles.all %>% 
+  mutate(trial_day = str_sub(ids.i., 1,8))
+library(nlme)
+library(car)
+m1 <- gls(entropy.counts.n. ~ treatment, data = rel.angles.all2)
+m2 <- lme(entropy.counts.n. ~ treatment, data = rel.angles.all2, random = ~1|trial_day)
+m3 <- lme(entropy.counts.n. ~ treatment, data = rel.angles.all2, random = ~1|trial_day, weights = varIdent(form = ~1|treatment))
+anova(m1, m2) # RANDOM EFFECT NOT NEEDED!
+anova(m1, m3) # Weights NOT needed.
+anova(m2, m3) # Weights NOT needed.
+Anova(m1) 
+Anova(m2)
+Anova(m3)
+# All 3 models give more or less the same results
+mcheck(m1)
+mcheck(m2) 
+mcheck2(m3)
+# All validations OK.
+
+
+# Plotting
 p2 <- rel.angles.all %>% 
   mutate(labels = ifelse(treatment == "Control", "a", "b")) %>% 
   ggplot(aes(x = treatment, y = entropy.counts.n.)) +
@@ -288,7 +309,6 @@ plot_grid(p1, p2, ncol = 2, align = 'h', labels = "AUTO")
 # Checking relationship between qmoments and rel.angles entropy ----
 # # #
 
-detach("package:dplyr")
 source("urchins_q_moments.R")
 
 library(tidyverse)

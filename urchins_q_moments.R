@@ -206,3 +206,24 @@ ggplot(aes(x = treatment, y = mean)) +
 
 
 
+# # # 
+# Comparing the exponents for each experimental condition, with random effect: trial day ----
+# # # 
+
+fin2 <- fin %>% 
+  mutate(trial_day = str_sub(ID, 1,8))
+
+m1 <- gls(coef ~ treatment, data = fin2)
+m2 <- lme(coef ~ treatment, data = fin2, random = ~1|trial_day)
+m3 <- lme(coef ~ treatment, data = fin2, random = ~1|trial_day, weights = varIdent(form = ~1|treatment))
+anova(m1, m2) # RANDOM EFFECT NOT NEEDED!
+anova(m1, m3) # Weights needed.
+anova(m2, m3) # Weights needed.
+Anova(m1) 
+Anova(m2)
+Anova(m3)
+# All 3 models give more or less the same results
+mcheck(m1)
+mcheck(m2) # Both heteroscedastic.
+mcheck2(m3) # Now solved.
+
