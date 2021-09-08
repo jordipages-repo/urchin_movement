@@ -29,7 +29,7 @@ for(i in 1:length(urch.null)){
   R2n <- urch.null[[i]]$R2n
   abs.angle <- urch.null[[i]]$abs.angle
   rel.angle <- urch.null[[i]]$rel.angle
-  ID <- rep(id(urch.null)[i], length(x))
+  ID <- rep(adehabitatLT::id(urch.null)[i], length(x))
   time <- urch.null[[i]]$date
   matriu <- data.frame(x, y, ID, time, dist, R2n, abs.angle, rel.angle)
   urch.null.MAT <- rbind(urch.null.MAT, matriu)
@@ -54,7 +54,7 @@ for(i in 1:length(urch.pred)){
   R2n <- urch.pred[[i]]$R2n
   abs.angle <- urch.pred[[i]]$abs.angle
   rel.angle <- urch.pred[[i]]$rel.angle
-  ID <- rep(id(urch.pred)[i], length(x))
+  ID <- rep(adehabitatLT::id(urch.pred)[i], length(x))
   time <- urch.pred[[i]]$date
   matriu <- data.frame(x, y, ID, time, dist, R2n, abs.angle, rel.angle)
   urch.pred.MAT <- rbind(urch.pred.MAT, matriu)
@@ -299,7 +299,6 @@ p2 <- rel.angles.all %>%
 
 # Cowplot panels
 library(cowplot)
-
 plot_grid(p1, p2, ncol = 2, align = 'h', labels = "AUTO")
 # ggsave2("Figs/Cowplot_entropy.pdf", width = 300, height = 150, units = "mm")
 
@@ -349,3 +348,34 @@ entropyVSqmom <- x.all %>%
 library(cowplot)
 plot_grid(p2, entropyVSqmom, ncol = 2, align = "h", labels = "AUTO")
 # ggsave2("Figs/Entropy_panel_plot.pdf", width = 310, height = 150, units = "mm")
+
+
+# Modelling the effects of both treatment AND slopes on entropy
+entropy_data <- x.all %>% 
+  left_join(rel.angles.all, by = "ID") %>% 
+  left_join(fin, by = "ID") %>% 
+  mutate(trial_day = str_sub(ID, 1, 8))
+m1 <- lm(rel.angles.entropy ~ treatment*coef, data = entropy_data)
+Anova(m1)
+mcheck(m1)
+
+m1.bis <- gls(rel.angles.entropy ~ treatment+coef, data = entropy_data)
+m1.w <- gls(rel.angles.entropy ~ treatment+coef, data = entropy_data, weights = varIdent(form = ~1|treatment))
+anova(m1.bis,m1.w)
+# WEIGHTS NOT NEEDED!
+
+m1.lme <- lme(rel.angles.entropy ~ treatment+coef, data = entropy_data, random = ~1|trial_day)
+anova(m1.bis, m1.lme)
+# Random effect not needed.
+
+mfinal <- lm(rel.angles.entropy ~ treatment*coef, data = entropy_data)
+Anova(mfinal)
+# Anova Table (Type II tests)
+# Response: rel.angles.entropy
+#                 Sum Sq Df F value    Pr(>F)    
+# treatment      0.33325  1  8.0120  0.006868 ** 
+# coef           1.82679  1 43.9190 3.308e-08 ***
+# treatment:coef 0.14435  1  3.4705  0.068864 .  
+# Residuals      1.91335 46                      
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

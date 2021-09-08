@@ -60,6 +60,83 @@ qmom <- function(granMAT){
   llistaExponents
 }
 
+###
+
+loglogdata <- function(granMAT, nom){
+  graella <- NULL
+  MAT <- filter(granMAT, ID == nom)
+    # In this for, we select a value for tau
+    for(j in 4:(length(MAT$x)-1)){
+      tau <- j
+      matriu <- matrix(nrow = 1, ncol = 1)
+      matriu <- as.data.frame(matriu)
+      names(matriu) <-  c("tau")
+      #  And in this loop, we calculate the distance between increments (see Seuront and Stanley PNAS) 
+      for(i in 1:(length(MAT$x)-j)){
+        if(i+tau <= length(MAT$x)){
+          d <- sqrt((MAT$x[i+tau]-MAT$x[i])^2+(MAT$y[i+tau]-MAT$y[i])^2)
+          matriu[i, 1] <- tau
+          # Finally, in this loop, we calculate the qth moment (q being between 0 and 8) for each d
+          for(q in 0:8){
+            matriu[i, q+2] <- d^(q)
+            names(matriu)[q+2] <- paste("q", q, sep = "")
+          }
+        }
+      }
+      graella <- rbind(graella, matriu)
+    }
+  graella
+  }
+
+
+####
+
+qmom1 <- function(granMAT, nom){
+  llistaExponents <- matrix(nrow = 1, ncol = 4)
+  llistaExponents <- as.data.frame(llistaExponents)
+  names(llistaExponents) <-  c("ID", "exponents", "num", "conf.int")
+  # This first loop selects a single sea urchin every time it loops.
+    graella <- NULL
+    MAT <- filter(granMAT, ID == nom)
+    # In this second for, we select a value for tau
+    for(j in 4:(length(MAT$x)-1)){
+      tau <- j
+      matriu <- matrix(nrow = 1, ncol = 1)
+      matriu <- as.data.frame(matriu)
+      names(matriu) <-  c("tau")
+      #  And in this 3rd loop, we calculate the distance between increments (see Seuront and Stanley PNAS) 
+      for(i in 1:(length(MAT$x)-j)){
+        if(i+tau <= length(MAT$x)){
+          d <- sqrt((MAT$x[i+tau]-MAT$x[i])^2+(MAT$y[i+tau]-MAT$y[i])^2)
+          matriu[i, 1] <- tau
+          # Finally, in this 4th loop, we calculate the qth moment (q being between 0 and 8) for each d
+          for(q in 0:8){
+            matriu[i, q+2] <- d^(q)
+            names(matriu)[q+2] <- paste("q", q, sep = "")
+          }
+        }
+      }
+      graella <- rbind(graella, matriu)
+    }
+    
+    # We now calculate the exponents of the regression between mean.dist and tau
+    tot.expon <- matrix(nrow = 1, ncol = 4)
+    tot.expon <- as.data.frame(tot.expon)
+    names(tot.expon) <-  c("ID", "exponents", "num", "conf.int")
+    for(r in 2:length(names(graella))){
+      mean.dist <- tapply(graella[, r], graella$tau, mean)
+      mean.dist <- as.numeric(mean.dist)
+      a <- lm(log(mean.dist)~log(unique(graella$tau)))
+      exponent <- as.numeric(coef(a)[2])
+      conf.int <- as.numeric(summary(a)$coefficients[4])
+      tot.expon[r-1,1] <- nom
+      tot.expon[r-1,2] <- exponent
+      tot.expon[r-1,3] <- r-2
+      tot.expon[r-1,4] <- conf.int
+    }
+  tot.expon  
+}
+
 
 ###
 

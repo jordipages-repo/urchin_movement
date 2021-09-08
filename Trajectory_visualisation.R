@@ -121,39 +121,63 @@ library(tidyverse)
 library(cowplot)
 library(ggsci)
 
+tib_urch.null.MAT <- as_tibble(urch.null.MAT)
+a <- tib_urch.null.MAT %>% 
+  group_by(ID) %>% 
+  summarise(mintime = min(time),
+            maxtime = max(time),
+            difftime = (maxtime-mintime)/60) 
+# write_csv(a, file = "control_times.csv")
 
-p1 <- urch.null.MAT %>% 
+tib_urch.pred.MAT <- as_tibble(urch.pred.MAT)
+b <- tib_urch.pred.MAT %>% 
+  group_by(ID) %>% 
+  summarise(mintime = min(time),
+            maxtime = max(time),
+            difftime = (maxtime-mintime)) %>%
+  print(n = Inf)
+# write_csv(b, file = "pred_times.csv")
+
+
+urch.null.MAT %>% 
   # filter(ID %in% sample(unique(ID), 21)) %>% 
   dplyr::left_join(dplyr::select(fin, coef, ID), by = "ID") %>% 
+  dplyr::left_join(dplyr::select(a, difftime, ID), by = "ID") %>% 
   ggplot() +
-  # geom_path(aes(x = x, y = y, colour = ID)) +
   geom_path(aes(x = x, y = y, group = ID, alpha = coef), colour = "#1F77B4FF") +
+  # geom_text(aes(x = 1000, y = 500, label = difftime)) +
+  # geom_point(aes(x = x, y = y, colour = ID, alpha = coef), size = 0.00001, colour = "#1F77B4FF") +
   # geom_path(aes(x = x, y = y, alpha = ID), colour = "#1F77B4FF") +
   xlim(0, 1800) +
   ylim(0, 1300) +
   # ggtitle(label = "Control treatment", subtitle = "(subsample of n = 21)") +
   # ggtitle(label = "Control treatment", subtitle = "(n = 29)") +
+  facet_wrap(~ID) +
   theme_bw() +
   theme(legend.position = "none", 
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         text = element_text(size = 18))
+ggsave(filename = "urch.null_facet_time.pdf")
 
-p2 <- urch.pred.MAT %>% 
+urch.pred.MAT %>% 
   dplyr::left_join(dplyr::select(fin, coef, ID), by = "ID") %>% 
+  dplyr::left_join(dplyr::select(b, difftime, ID), by = "ID") %>% 
   ggplot() +
   # geom_path(aes(x = x, y = y, colour = ID)) +
   geom_path(aes(x = x, y = y, group = ID, alpha = coef), colour = "#FF7F0EFF") +
+  # geom_text(aes(x = 1000, y = 500, label = difftime)) +
   # geom_path(aes(x = x, y = y, alpha = ID), colour = "#FF7F0EFF") +
   xlim(0, 1800) +
   ylim(0, 1300) +
   # ggtitle(label = "Predator treatment", subtitle = "(n = 21)") +
+  facet_wrap(~ID) +
   theme_bw() +
   theme(legend.position = "none", 
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),
         text = element_text(size = 18))
-
+ggsave(filename = "urch.pred_facet_time.pdf")
 plot_grid(p1, p2, ncol = 2, align = 'h', labels = "AUTO")
 # ggsave2("Figs/Cowplot_controlsubsampleVSpredatorsOK.pdf", width = 300, height = 150, units = "mm")
 

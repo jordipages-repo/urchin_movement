@@ -96,7 +96,7 @@ dades$asin.tort <- asin(dades$tortuosity)
 boxplot(tortuosity~exp, data = dades)
 boxplot(asin.tort~exp, data = dades)
 model1 <- lm(tortuosity~exp, data = dades)
-anova(model1)
+car::Anova(model1)
 # Analysis of Variance Table
 # Response: tortuosity
 #           Df Sum Sq  Mean Sq F value  Pr(>F)  
@@ -253,7 +253,7 @@ boxplot(mean.speed~experiment, data = dades) # We can see 2 outliers
 
 # Modelling velocity vs. experiment, without deleting outliers
 model <- lm(mean.speed~experiment, data = dades)
-anova(model) 
+car::Anova(model) 
 # Analysis of Variance Table
 # Response: mean.speed
 #           Df  Sum Sq Mean Sq F value   Pr(>F)   
