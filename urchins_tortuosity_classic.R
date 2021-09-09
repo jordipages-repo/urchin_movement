@@ -321,7 +321,7 @@ library(dplyr)
 # Boxplot
 speed <- as_tibble(dades)
 speed <- speed %>% 
-  mutate(exp = recode(exp,
+  mutate(exp = recode(experiment,
                       null = "Control",
                       predator = "Predators"))
 

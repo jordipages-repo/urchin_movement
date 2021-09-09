@@ -30,11 +30,20 @@ urch.null.MAT <- subset(urch.null.MAT, ID != "20120528_4" & ID != "20120528_5" &
 # unique(urch.null.MAT$ID)[10]
 
 # Getting the data needed
-graella <- loglogdata(urch.null.MAT, unique(urch.null.MAT$ID)[9])
+p4 <- ggplot(data = urch.null.MAT %>% filter(ID == unique(urch.null.MAT$ID)[9])) +
+  geom_path(aes(x = x, y = y), colour = "#1F77B4FF") +
+  ylab("") +
+  coord_cartesian(xlim = c(0,1800), ylim = c(0,1300)) +
+  theme_bw() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        text = element_text(size = 18))
+p4
 
+graella <- loglogdata_logbin(urch.null.MAT, unique(urch.null.MAT$ID)[9])
 tgraella <- as_tibble(graella)
 tgraella
-
 p5 <- tgraella %>% 
   group_by(tau) %>% 
   summarise(`mean_q = 0` = mean(q0),
@@ -53,7 +62,7 @@ p5 <- tgraella %>%
     geom_smooth(method = "lm", aes(group = name, colour = name), lwd = 0.5, se = F) + 
     geom_text_repel(aes(label = label), nudge_x = 0.15, na.rm = TRUE, size = 5, segment.color = NA) +
     scale_colour_d3("category20") +
-    coord_cartesian(xlim = c(0.5,2.5)) + 
+    coord_cartesian(xlim = c(0,2.5)) + 
     xlab(expression(log(tau))) + 
     # ylab(expression(paste("log(<", Delta, "X", tau^q, ">)"))) +
     ylab("") +
@@ -63,9 +72,9 @@ p5 <- tgraella %>%
           panel.grid.minor = element_blank(),
           text = element_text(size = 18))
 # ggsave(filename = "Documents/FEINA/POSTDOCTORAT/ARTICLES/Moviment_Garotes_Fede/WORDS/Figures_finals/Fig.S3_new.pdf",  width = 9, height = 8)
+p5
 
-
-exponents <- qmom1(urch.null.MAT, unique(urch.null.MAT$ID)[9])
+exponents <- qmom1_logbin(urch.null.MAT, unique(urch.null.MAT$ID)[9])
 
 p6 <- ggplot(data = exponents) + 
   geom_line(aes(x = num, y = exponents), colour = "#1F77B4FF", lwd = 0.6) +
@@ -81,19 +90,9 @@ p6 <- ggplot(data = exponents) +
         text = element_text(size = 18))
 
 
-p4 <- ggplot(data = urch.null.MAT %>% filter(ID == unique(urch.null.MAT$ID)[9])) +
-  geom_path(aes(x = x, y = y), colour = "#1F77B4FF") +
-  ylab("") +
-  coord_cartesian(xlim = c(0,1800), ylim = c(0,1300)) +
-  theme_bw() +
-  theme(legend.position = "none", 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        text = element_text(size = 18))
-
 
 granplot1 <- plot_grid(p1, p2, p3, ncol = 1, align = "v", labels = c("A", "C", "E"))
 granplot2 <- plot_grid(p4, p5, p6, ncol = 1, align = "v", labels = c("B", "D", "F"))
 
 plot_grid(granplot1, granplot2, ncol = 2)
-ggsave2(filename = "Figs/Revision_loglogPlots.png", width = 9.5, height = 9)
+ggsave2(filename = "Figs/Revision_loglogPlots_logbinned.pdf", width = 9.5, height = 9)

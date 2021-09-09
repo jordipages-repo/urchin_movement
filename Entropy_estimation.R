@@ -284,6 +284,7 @@ p2 <- rel.angles.all %>%
   ggplot(aes(x = treatment, y = entropy.counts.n.)) +
   geom_violin(aes(fill = treatment)) + 
   geom_boxplot(width = 0.1) + 
+  geom_jitter(position = position_jitter(seed = 1, width = 0.2), colour = "#404040") +
   scale_fill_d3(palette = "category20") +
   geom_text(aes(y = max(entropy.counts.n.) + 0.1, label = labels), check_overlap = T) +
   xlab("") +
@@ -373,9 +374,9 @@ Anova(mfinal)
 # Anova Table (Type II tests)
 # Response: rel.angles.entropy
 #                 Sum Sq Df F value    Pr(>F)    
-# treatment      0.33325  1  8.0120  0.006868 ** 
-# coef           1.82679  1 43.9190 3.308e-08 ***
-# treatment:coef 0.14435  1  3.4705  0.068864 .  
-# Residuals      1.91335 46                      
+# treatment      0.25185  1  6.0219   0.01798 *  
+# coef           1.86437  1 44.5788 2.787e-08 ***
+# treatment:coef 0.09632  1  2.3030   0.13596    
+# Residuals      1.92380 46                          
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

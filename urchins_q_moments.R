@@ -38,7 +38,8 @@ for(i in 1:length(urch.null)){
 urch.null.MAT <- subset(urch.null.MAT, ID != "20120528_4" & ID != "20120528_5" & ID != "20120528_6" & ID != "20120607_5")
 
 # We'll now calculate the q's exponents for a whole stack of urchins with qmom() function
-listExp.urch.null <- qmom(urch.null.MAT)
+# listExp.urch.null <- qmom(urch.null.MAT)
+listExp.urch.null <- qmom_logbin(urch.null.MAT)
 
 # We now plot all control urchins individually
 qs <- seq(from = 0, to = 8, by=1)
@@ -83,7 +84,7 @@ for(i in 1:length(urch.pred)){
 urch.pred.MAT <- subset(urch.pred.MAT, ID != "20120613_12" & ID != "20120614_8")
 
 # We'll now calculate the q's exponents for a whole stack of urchins with qmom() function
-listExp.urch.pred <- qmom(urch.pred.MAT)
+listExp.urch.pred <- qmom_logbin(urch.pred.MAT)
 
 # We now plot all urchins from the predator cues treatment, individually
 qs <- seq(from = 0, to = 8, by=1)
@@ -118,14 +119,14 @@ names(fin)[3] <- "treatment"
 boxplot(fin$coef~fin$treatment)
 testem <- aov(lm(fin$coef~fin$treatment))
 summary(testem)
-#             Df Sum Sq Mean Sq F value  Pr(>F)   
-# fin$fin.id   1 0.3071 0.30709   7.229 0.00983 **
-# Residuals   48 2.0390 0.04248                   
+#               Df Sum Sq Mean Sq F value  Pr(>F)   
+# fin$treatment  1 0.1053  0.1053    9.15 0.00399 **
+# Residuals     48 0.5522  0.0115                   
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 TukeyHSD(testem)
 #               diff        lwr       upr     p adj
-# predat-null 0.1587862 0.04004473 0.2775276 0.0098327
+# predat-null 0.09296187 0.03117168 0.1547521 0.003987
 
 # Model validation
 mcheck(testem) # We see quite some heterogeneity, but OK normality.
@@ -141,7 +142,7 @@ car::Anova(mfinal)
 # Analysis of Deviance Table (Type II tests)
 # Response: coef
 #           Df  Chisq Pr(>Chisq)   
-# treatment  1 8.5664   0.003424 **
+# treatment  1 10.739   0.001049 **
 # ---
 # Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 mcheck2(mfinal) # Now, using Pearson's residuals, we see that there is no longer heterogeneity in the residuals.
@@ -149,14 +150,14 @@ mcheck2(mfinal) # Now, using Pearson's residuals, we see that there is no longer
 # Barplot of the exponents for each treatment
 mitj <- tapply(fin$coef, fin$treatment, mean)
 #     null    predat    
-# 0.6743501 0.8331362 
+# 0.8211005 0.9140624 
 std <- tapply(fin$coef, fin$treatment, std.error)
 #     null     predat     
-# 0.04525674 0.02991768  
+# 0.02337459 0.01607287   
 bp <- barplot(mitj, ylim = c(0,1), ylab = "Psi(q) slope", names.arg = c("null", "predators"))
 arrows(bp, mitj, bp, mitj + std,  lwd = 1.5, angle = 90, length = 0.1)
 arrows(bp, mitj, bp, mitj - std,  lwd = 1.5, angle = 90, length = 0.1)
-text(x = bp, y = mitj + 0.15, labels = c("a", "b"))
+text(x = bp, y = mitj + 0.05, labels = c("a", "b"))
 
 
 # Final plot in ggplot

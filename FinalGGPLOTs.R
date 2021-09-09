@@ -78,7 +78,8 @@ plot_grid(box.straightness, box.velocity, box.exponents, ncol = 1, align = 'v', 
 # # # 
 violin.straightness <- ggplot(tort, aes(x = exp, y = tortuosity)) +
   geom_violin(aes(fill = exp)) +
-  geom_boxplot(width=0.05) +
+  geom_boxplot(width=0.05, outlier.colour = "transparent") +
+  geom_jitter(position = position_jitter(seed = 1, width = 0.2), colour = "#404040") +
   # stat_summary(fun=median, geom="point", size=3, color="black", pch = 15) +
   geom_text(aes(y = max(tortuosity) + 0.1, label = labels), check_overlap = T) +
   scale_fill_d3(palette = "category20") +
@@ -95,7 +96,8 @@ violin.straightness <- ggplot(tort, aes(x = exp, y = tortuosity)) +
 
 violin.velocity <- ggplot(speed, aes(x = exp, y = mean.speed.cm)) +
   geom_violin(aes(fill = exp)) +
-  geom_boxplot(width=0.05) +
+  geom_boxplot(width=0.05, outlier.colour = "transparent") +
+  geom_jitter(position = position_jitter(seed = 1, width = 0.2), colour = "#404040") +
   # stat_summary(fun=median, geom="point", size=3, color="black", pch = 15) +
   geom_text(aes(y = max(mean.speed.cm) + 1, label = labels), check_overlap = T) +
   scale_fill_d3(palette = "category20") +
@@ -110,9 +112,10 @@ violin.velocity <- ggplot(speed, aes(x = exp, y = mean.speed.cm)) +
 
 violin.exponents <- ggplot(fin, aes(x = treatment, y = coef)) +
   geom_violin(aes(fill = treatment)) +
-  geom_boxplot(width=0.05) +
+  geom_boxplot(width=0.05, outlier.colour = "transparent") +
+  geom_jitter(position = position_jitter(seed = 1, width = 0.2), colour = "#404040") +
   # stat_summary(fun=median, geom="point", size=3, color="black", pch = 15) +
-  geom_text(aes(y = max(coef) + 0.1, label = labels), check_overlap = T) +
+  geom_text(aes(y = max(coef) + 0.05, label = labels), check_overlap = T) +
   scale_fill_d3(palette = "category20") +
   geom_hline(yintercept = 0.5, lty = 2) +
   geom_hline(yintercept = 1, lty = 3) +
@@ -120,7 +123,7 @@ violin.exponents <- ggplot(fin, aes(x = treatment, y = coef)) +
   # scale_y_continuous(labels = scales::number_format(accuracy = 0.1)) +
   xlab("") +
   ylab(expression(paste(zeta,"(q)"))) +
-  coord_cartesian(ylim = c(0,1.1)) +
+  coord_cartesian(ylim = c(0.5,1.05)) +
   theme_bw() +
   theme(legend.position = "none", 
         panel.grid.major = element_blank(), 
@@ -129,7 +132,7 @@ violin.exponents <- ggplot(fin, aes(x = treatment, y = coef)) +
 
 plot_grid(violin.straightness, violin.velocity, violin.exponents, ncol = 1, align = 'v', labels = "AUTO")
 # ggsave2("Figs/Cowplot_violinplots.pdf")
-# ggsave2("Figs/Cowplot_violinplots.pdf", width = 130, height = 300, units = "mm")
+ggsave2("Figs/Cowplot_violinplots.pdf", width = 130, height = 300, units = "mm")
 
 
 # # # 
@@ -213,6 +216,7 @@ q1 <- as_tibble(listExp.urch.null) %>%
   left_join(select(fin, coef, ID), by = "ID") %>% 
   ggplot() + 
   geom_line(aes(x = qs, y = exponents, group = ID, alpha = coef), colour = "#1F77B4FF", lwd = 0.6) +
+  scale_alpha(range = c(0.2,1)) + 
   # geom_line(aes(x = qs, y = exponents, group = ID, alpha = ID), colour = "#1F77B4FF", lwd = 0.6) +
   # geom_line(aes(x = qs, y = exponents, colour = ID)) +
   # geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
@@ -240,6 +244,7 @@ q2 <- as_tibble(listExp.urch.pred) %>%
   left_join(select(fin, coef, ID), by = "ID") %>% 
   ggplot() + 
   geom_line(aes(x = qs, y = exponents, group = ID, alpha = coef), colour = "#FF7F0EFF", lwd = 0.6) +
+  scale_alpha(range = c(0.2,1)) + 
   # geom_line(aes(x = qs, y = exponents, group = ID, alpha = ID), colour = "#1F77B4FF", lwd = 0.6) +
   # geom_line(aes(x = qs, y = exponents, colour = ID)) +
   # geom_line(aes(x = qs, y = exponents, group = ID), alpha = 0.33, lwd = 0.6) +
@@ -266,4 +271,4 @@ q2
 source("Trajectory_visualisation.R")
 
 plot_grid(p1, q1, p2, q2, ncol = 2, nrow = 2, labels = "AUTO")
-# ggsave("Figs/trajectoriesANDqmomentsALPHAforQExponents.pdf")
+# ggsave("Figs/trajectoriesANDqmomentsALPHAforQExponents.pdf", width = 10.11, height = 7.89, units = "in")
